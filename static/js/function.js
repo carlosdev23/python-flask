@@ -5,10 +5,13 @@ $(function() {
             data: $('form').serialize(),
             type: 'POST',
             success: function(response) {
-                console.log(response);
+              
+              $('.alert').show()
+              $('.alert-success').removeData()
+              $('.alert-success').append('<strong>Well done!</strong>' + response )
             },
             error: function(error) {
-                console.log(error);
+
             }
         });
     });

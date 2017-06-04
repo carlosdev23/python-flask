@@ -3,17 +3,16 @@ from flask import Flask, render_template, request, json
 from  flask_mysqldb import MySQL
 from werkzeug import generate_password_hash, check_password_hash
 
+
 # define our applications.
 app = Flask(__name__)
 
-mysql = MySQL()
-
 # MySQL Configuration
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'localhost'
+app.config['MYSQL_PASSWORD'] = 'riksof'
 app.config['MYSQL_DB'] = 'BucketList'
 app.config['MYSQL_HOST'] = 'localhost'
-mysql.init_app(app)
+mysql = MySQL(app)
 
 # route to index.html
 @app.route("/")
@@ -34,21 +33,28 @@ def signUp ():
         _email = request.form['inputEmail']
         _password = request.form['inputPassword']
 
-        # validate the received values
+        # validate the received values.
         if _name and _email and _password:
+            # cursor connection
             cur = mysql.connection.cursor()
-            _hashed_password = generate_password_hash(_password)
-            print _hashed_password
-            cur.callproc('sp_createUser',(_name,_email,_hashed_password))
+            # query execute
+            cur.execute("SELECT * FROM tbl_user WHERE user_email = %s",[_email])
             data = cur.fetchall()
 
-            if len( data ) is 0:
-                return json.dumps({'message':'User created successfully !'})
+            # if user is exist or not.
+            if len ( data ) is 0:
+                # insert user Data
+                cur.execute("INSERT INTO tbl_user( user_email, user_username, user_password ) VALUES ( %s, %s, %s )",[ _email, _name, _password ])
+                mysql.connection.commit()
+                return json.dumps({'message':'User created successfully.'})
+
             else:
-                return json.dumps({'error': str( data[0] )})
+                return json.dumps({'error': 'Email address is already used.'}), 400, {'ContentType':'application/json'}
         else:
-            return json.dumps({'html':'<span>Enter the required fields</span>'})
+            return json.dumps({'error':'Enter the required fields'}), 400, {'ContentType':'application/json'}
     except Exception as e:
         return json.dumps({'error': str(e)})
+
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
