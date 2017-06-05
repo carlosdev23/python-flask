@@ -2,7 +2,7 @@ from flask import Flask
 from flask import Flask, render_template, request, json
 from  flask_mysqldb import MySQL
 from werkzeug import generate_password_hash, check_password_hash
-
+from flask import Response
 
 # define our applications.
 app = Flask(__name__)
@@ -46,15 +46,23 @@ def signUp ():
                 # insert user Data
                 cur.execute("INSERT INTO tbl_user( user_email, user_username, user_password ) VALUES ( %s, %s, %s )",[ _email, _name, _password ])
                 mysql.connection.commit()
-                return json.dumps({'message':'User created successfully.'})
+                # response data.
+                responseData = json.dumps({'message':'User created successfully.'})
+                return Response(responseData, status=200, mimetype='application/json')
 
             else:
-                return json.dumps({'error': 'Email address is already used.'}), 400, {'ContentType':'application/json'}
+                # Set response for email duplications
+                responseData = json.dumps({'message': 'Email address is already used.'})
+                return Response(responseData, status=400, mimetype='application/json')
         else:
-            return json.dumps({'error':'Enter the required fields'}), 400, {'ContentType':'application/json'}
+            # Set repsonse for sign up form validation
+            responseData = json.dumps({'message':'Enter the required fields'})
+            return Response( responseData, status=400, mimetype='application/json')
+    # Exception occur
     except Exception as e:
         return json.dumps({'error': str(e)})
 
 
 if __name__ == "__main__":
     app.run(debug=True)
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
