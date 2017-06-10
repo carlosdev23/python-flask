@@ -35,6 +35,9 @@ $(function() {
             $('.alert').show()
             $('.alert-success').removeData()
             $('.alert-success').append('<strong>Well done!</strong>' + response.message )
+            var url  =  window.location.protocol + "//" + window.location.host + response.Url;
+            window.location = url;
+
           },
           error: function(errorResponse) {
             // Set alert for error.
@@ -42,7 +45,7 @@ $(function() {
             $('.alert-success').removeData()
             $('.alert').removeClass('alert-success')
             $('.alert').addClass('alert-warning')
-            $('.alert-warning').append('<strong>Well done!</strong> ' + errorResponse.responseJSON.message )
+            $('.alert-warning').append('<strong> Alert!</strong> ' + errorResponse.responseJSON.message )
           }
       });
     });

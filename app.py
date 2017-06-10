@@ -41,8 +41,10 @@ def showSignIn():
 # Route to main.
 @app.route('/mains')
 def mains():
-    return render_template('mains.html')
-
+    if 'username' in session:
+        return render_template('mains.html')
+    else:
+        return redirect( url_for('showSignIn') )
 # Server side sign in method
 @app.route('/signIn', methods=['POST'])
 def signIn():
@@ -65,9 +67,10 @@ def signIn():
             else:
                 if request.method == 'POST':
                     session['username'] = _name
-                    return redirect('mains')
-                    # responseData = json.dumps({'message': 'User Login Successfully'})
-                    # return Response(responseData, status=200, mimetype='application/json')
+                    # return redirect('mains')
+
+                    responseData = json.dumps({'message': 'User Login Successfully.', 'Url': url_for( 'mains')})
+                    return Response(responseData, status=200, mimetype='application/json')
 
     # Exception return.
     except Exception as e:
